@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Crodino Audit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #FAF7F2;
+    --card: #FFFFFF;
+    --accent: #C8401A;
+    --accent-light: #F5EAE5;
+    --text: #1A1A18;
+    --muted: #7A7870;
+    --border: #E8E4DC;
+    --success: #2D7A4F;
+    --success-bg: #EAF5EE;
+    --danger: #C8401A;
+    --danger-bg: #F5EAE5;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 2rem;
+  }
+
+  header {
+    background: var(--accent);
+    color: white;
+    padding: 1.25rem 1.25rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  header p {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: 2px;
+    font-weight: 300;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 1rem;
+    background: var(--accent);
+  }
+
+  .stat {
+    background: rgba(255,255,255,0.15);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem;
+    text-align: center;
+    color: white;
+  }
+
+  .stat .num {
+    font-size: 24px;
+    font-weight: 500;
+    font-family: 'DM Serif Display', serif;
+    line-height: 1;
+  }
+
+  .stat .lbl {
+    font-size: 10px;
+    opacity: 0.8;
+    margin-top: 2px;
+    font-weight: 300;
+  }
+
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+    position: sticky;
+    top: 85px;
+    z-index: 9;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 0.85rem;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .view { display: none; padding: 1rem; }
+  .view.active { display: block; }
+
+  .field { margin-bottom: 1rem; }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+
+  .field input[type=text],
+  .field textarea,
+  .field select {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    font-size: 16px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    -webkit-appearance: none;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .field input[type=text]:focus,
+  .field textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .field textarea { height: 72px; resize: none; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+
+  .chip {
+    padding: 0.5rem 0.9rem;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 400;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.12s;
+    user-select: none;
+  }
+
+  .chip.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .section-divider {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 1.5rem 0 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 1rem;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: opacity 0.15s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary:active { opacity: 0.85; transform: scale(0.99); }
+
+  .btn-secondary {
+    width: 100%;
+    background: var(--card);
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.85rem;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background 0.15s;
+  }
+
+  .btn-secondary:active { background: var(--accent-light); }
+
+  .entry-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .entry-card .en-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+
+  .entry-card .en-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 100px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+  }
+
+  .tag-yes { background: var(--success-bg); color: var(--success); }
+  .tag-no { background: var(--danger-bg); color: var(--danger); }
+  .tag-neutral { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+  .tag-high { background: #FFF3E0; color: #B35E00; }
+  .tag-medium { background: #FFF8E1; color: #8A6800; }
+  .tag-low { background: var(--bg); color: var(--muted); }
+
+  .entry-card .en-notes {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--muted);
+  }
+
+  .empty .icon {
+    font-size: 36px;
+    margin-bottom: 0.75rem;
+  }
+
+  .empty p { font-size: 14px; line-height: 1.6; }
+
+  .export-area {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    font-size: 12px;
+    font-family: monospace;
+    color: var(--muted);
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin-top: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: white;
+    padding: 0.65rem 1.25rem;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.25s;
+    pointer-events: none;
+    z-index: 100;
+    white-space: nowrap;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .confirm-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 50;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .confirm-overlay.show { display: flex; }
+
+  .confirm-sheet {
+    background: var(--card);
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 1.25rem;
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .confirm-sheet p { font-size: 15px; margin-bottom: 1rem; }
+  
+  .opp-bar {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  
+  .opp-btn {
+    flex: 1;
+    padding: 0.65rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.12s;
+    background: var(--card);
+    color: var(--text);
+  }
+  
+  .opp-btn.selected-high { background: #FFF3E0; border-color: #B35E00; color: #B35E00; }
+  .opp-btn.selected-medium { background: #FFF8E1; border-color: #8A6800; color: #8A6800; }
+  .opp-btn.selected-low { background: var(--bg); border-color: var(--muted); color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Crodino Field Audit</h1>
+  <p>Zürich bar survey — tap in as you go</p>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="num" id="s-total">0</div><div class="lbl">visited</div></div>
+  <div class="stat"><div class="num" id="s-yes">0</div><div class="lbl">have it</div></div>
+  <div class="stat"><div class="num" id="s-no">0</div><div class="lbl">don't</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('add')">+ New entry</button>
+  <button class="tab" onclick="showTab('list')">Entries</button>
+  <button class="tab" onclick="showTab('export')">Export</button>
+</div>
+
+<div id="view-add" class="view active">
+  <div class="field">
+    <label>Bar / restaurant name</label>
+    <input type="text" id="f-name" placeholder="e.g. Rimini Bar">
+  </div>
+  <div class="field">
+    <label>Neighbourhood</label>
+    <input type="text" id="f-hood" placeholder="e.g. Kreis 4, Seefeld...">
+  </div>
+  <div class="field">
+    <label>Venue type</label>
+    <div class="chips" id="chips-type">
+      <span class="chip" onclick="selectChip(this,'type')">Aperitivo bar</span>
+      <span class="chip" onclick="selectChip(this,'type')">Restaurant</span>
+      <span class="chip" onclick="selectChip(this,'type')">Hotel bar</span>
+      <span class="chip" onclick="selectChip(this,'type')">Cocktail bar</span>
+      <span class="chip" onclick="selectChip(this,'type')">Casual café</span>
+    </div>
+  </div>
+
+  <div class="section-divider">Crodino presence</div>
+
+  <div class="field">
+    <label>Is Crodino on the menu?</label>
+    <div class="chips" id="chips-crodino">
+      <span class="chip" onclick="selectChip(this,'crodino')">Yes</span>
+      <span class="chip" onclick="selectChip(this,'crodino')">No</span>
+      <span class="chip" onclick="selectChip(this,'crodino')">Not sure</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>If yes — how is it sold?</label>
+    <div class="chips" id="chips-how">
+      <span class="chip" onclick="selectChip(this,'how')">As a spritz</span>
+      <span class="chip" onclick="selectChip(this,'how')">Straight / on ice</span>
+      <span class="chip" onclick="selectChip(this,'how')">Featured drink</span>
+      <span class="chip" onclick="selectChip(this,'how')">Buried in menu</span>
+      <span class="chip" onclick="selectChip(this,'how')">N/A</span>
+    </div>
+  </div>
+
+  <div class="section-divider">Non-alc landscape</div>
+
+  <div class="field">
+    <label>Non-alc options overall</label>
+    <div class="chips" id="chips-nonalc">
+      <span class="chip" onclick="selectChip(this,'nonalc')">None beyond water</span>
+      <span class="chip" onclick="selectChip(this,'nonalc')">1–2 options</span>
+      <span class="chip" onclick="selectChip(this,'nonalc')">Dedicated section</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Competitor aperitifs visible</label>
+    <input type="text" id="f-comp" placeholder="Hugo, Lillet, Aperol, Martini...">
+  </div>
+
+  <div class="section-divider">Staff test</div>
+
+  <div class="field">
+    <label>Ask: "What non-alcoholic aperitif do you have?" — response?</label>
+    <textarea id="f-staff" placeholder="What did they say..."></textarea>
+  </div>
+
+  <div class="field">
+    <label>Crodino opportunity here</label>
+    <div class="opp-bar">
+      <button class="opp-btn" id="opp-high" onclick="selectOpp('High')">High</button>
+      <button class="opp-btn" id="opp-medium" onclick="selectOpp('Medium')">Medium</button>
+      <button class="opp-btn" id="opp-low" onclick="selectOpp('Low')">Low</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Notes (vibe, crowd, anything)</label>
+    <textarea id="f-notes" placeholder="e.g. busy terrace, young crowd, lots of Aperol on tables..."></textarea>
+  </div>
+
+  <button class="btn-primary" onclick="saveEntry()">Save entry</button>
+</div>
+
+<div id="view-list" class="view">
+  <div id="entries-list"></div>
+</div>
+
+<div id="view-export" class="view">
+  <p style="font-size: 14px; color: var(--muted); margin-bottom: 1rem; line-height: 1.6;">Copy all your data to share or paste into a doc. Use this to build your Crodino one-pager.</p>
+  <button class="btn-primary" onclick="copyExport()">Copy all data</button>
+  <button class="btn-secondary" onclick="toggleRaw()">Show raw data</button>
+  <button class="btn-secondary" onclick="confirmClear()">Clear all entries</button>
+  <div class="export-area" id="export-area"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="confirm-overlay" id="confirm-overlay" onclick="hideConfirm()">
+  <div class="confirm-sheet" onclick="event.stopPropagation()">
+    <p>Delete all entries? This cannot be undone.</p>
+    <button class="btn-primary" style="background: var(--danger)" onclick="clearAll()">Yes, delete everything</button>
+    <button class="btn-secondary" onclick="hideConfirm()">Cancel</button>
+  </div>
+</div>
+
+<script>
+  let data = JSON.parse(localStorage.getItem('crodino_v2') || '[]');
+  let selected = { type: '', crodino: '', how: '', nonalc: '', opp: '' };
+
+  function showTab(t) {
+    document.querySelectorAll('.tab').forEach((el,i) => {
+      el.classList.toggle('active', ['add','list','export'][i] === t);
+    });
+    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+    document.getElementById('view-' + t).classList.add('active');
+    if (t === 'list') renderList();
+    if (t === 'export') renderExport();
+  }
+
+  function selectChip(el, group) {
+    document.querySelectorAll(`#chips-${group} .chip`).forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selected[group] = el.textContent;
+  }
+
+  function selectOpp(val) {
+    selected.opp = val;
+    ['High','Medium','Low'].forEach(v => {
+      const btn = document.getElementById('opp-' + v.toLowerCase());
+      btn.className = 'opp-btn';
+      if (v === val) btn.classList.add('selected-' + v.toLowerCase());
+    });
+  }
+
+  function g(id) { return (document.getElementById(id)?.value || '').trim(); }
+
+  function saveEntry() {
+    const name = g('f-name');
+    if (!name) { showToast('Add a bar name first'); return; }
+    const entry = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+      name, hood: g('f-hood'),
+      type: selected.type,
+      crodino: selected.crodino,
+      how: selected.how,
+      nonalc: selected.nonalc,
+      comp: g('f-comp'),
+      staff: g('f-staff'),
+      opp: selected.opp,
+      notes: g('f-notes')
+    };
+    data.unshift(entry);
+    localStorage.setItem('crodino_v2', JSON.stringify(data));
+    updateStats();
+    resetForm();
+    showToast('Entry saved!');
+  }
+
+  function resetForm() {
+    ['f-name','f-hood','f-comp','f-staff','f-notes'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.opp-btn').forEach(b => b.className = 'opp-btn');
+    selected = { type: '', crodino: '', how: '', nonalc: '', opp: '' };
+  }
+
+  function updateStats() {
+    document.getElementById('s-total').textContent = data.length;
+    document.getElementById('s-yes').textContent = data.filter(d => d.crodino === 'Yes').length;
+    document.getElementById('s-no').textContent = data.filter(d => d.crodino === 'No').length;
+  }
+
+  function renderList() {
+    const el = document.getElementById('entries-list');
+    if (!data.length) {
+      el.innerHTML = `<div class="empty"><div class="icon">🍊</div><p>No entries yet.<br>Go hit some bars and start filling this in.</p></div>`;
+      return;
+    }
+    el.innerHTML = data.map(d => `
+      <div class="entry-card">
+        <div class="en-name">${d.name}</div>
+        <div class="en-meta">${[d.date, d.hood, d.type].filter(Boolean).join(' · ')}</div>
+        <span class="tag ${d.crodino === 'Yes' ? 'tag-yes' : d.crodino === 'No' ? 'tag-no' : 'tag-neutral'}">${d.crodino === 'Yes' ? 'Has Crodino' : d.crodino === 'No' ? 'No Crodino' : d.crodino || 'Unknown'}</span>
+        ${d.opp ? `<span class="tag tag-${d.opp.toLowerCase()}">${d.opp} opportunity</span>` : ''}
+        ${d.nonalc ? `<span class="tag tag-neutral">${d.nonalc}</span>` : ''}
+        ${d.comp ? `<div class="en-notes">Competition: ${d.comp}</div>` : ''}
+        ${d.staff ? `<div class="en-notes">Staff said: "${d.staff}"</div>` : ''}
+        ${d.notes ? `<div class="en-notes">${d.notes}</div>` : ''}
+      </div>`).join('');
+  }
+
+  function renderExport() {
+    const area = document.getElementById('export-area');
+    area.textContent = formatExport();
+  }
+
+  function formatExport() {
+    if (!data.length) return 'No entries yet.';
+    const summary = `CRODINO BAR AUDIT — ZÜRICH\n${'='.repeat(30)}\nTotal bars visited: ${data.length}\nHave Crodino: ${data.filter(d=>d.crodino==='Yes').length}\nDon't have Crodino: ${data.filter(d=>d.crodino==='No').length}\nHigh opportunity venues: ${data.filter(d=>d.opp==='High').length}\n\n`;
+    const entries = data.map((d,i) => `${i+1}. ${d.name} (${d.hood || 'no area'}) — ${d.date}\nType: ${d.type || '—'}\nCrodino on menu: ${d.crodino || '—'}\nHow sold: ${d.how || '—'}\nNon-alc options: ${d.nonalc || '—'}\nCompetitors: ${d.comp || '—'}\nStaff response: ${d.staff || '—'}\nOpportunity: ${d.opp || '—'}\nNotes: ${d.notes || '—'}`).join('\n\n---\n\n');
+    return summary + entries;
+  }
+
+  function copyExport() {
+    const text = formatExport();
+    if (!data.length) { showToast('No data to copy yet'); return; }
+    navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!')).catch(() => {
+      document.getElementById('export-area').style.display = 'block';
+      showToast('See raw data below — select and copy');
+    });
+  }
+
+  function toggleRaw() {
+    const area = document.getElementById('export-area');
+    area.style.display = area.style.display === 'block' ? 'none' : 'block';
+    area.textContent = formatExport();
+  }
+
+  function confirmClear() { document.getElementById('confirm-overlay').classList.add('show'); }
+  function hideConfirm() { document.getElementById('confirm-overlay').classList.remove('show'); }
+  function clearAll() {
+    data = []; localStorage.removeItem('crodino_v2');
+    updateStats(); hideConfirm(); showToast('All entries cleared');
+    renderExport();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  updateStats();
+</script>
+</body>
+</html>
