@@ -491,6 +491,19 @@
   </div>
 
   <div class="field">
+    <label>If no Crodino — ask "Why don't you sell it?" — response?</label>
+    <div class="chips" id="chips-whynot">
+      <span class="chip" onclick="selectChip(this,'whynot')">Never heard of it</span>
+      <span class="chip" onclick="selectChip(this,'whynot')">No demand</span>
+      <span class="chip" onclick="selectChip(this,'whynot')">Supplier doesn't offer</span>
+      <span class="chip" onclick="selectChip(this,'whynot')">No non-alc focus</span>
+      <span class="chip" onclick="selectChip(this,'whynot')">Used to carry it</span>
+      <span class="chip" onclick="selectChip(this,'whynot')">N/A (has it)</span>
+    </div>
+    <textarea id="f-whynot" placeholder="Their exact words..." style="margin-top: 8px;"></textarea>
+  </div>
+
+  <div class="field">
     <label>Crodino opportunity here</label>
     <div class="opp-bar">
       <button class="opp-btn" id="opp-high" onclick="selectOpp('High')">High</button>
@@ -531,7 +544,7 @@
 
 <script>
   let data = JSON.parse(localStorage.getItem('crodino_v2') || '[]');
-  let selected = { type: '', crodino: '', how: '', nonalc: '', opp: '', city: '' };
+  let selected = { type: '', crodino: '', how: '', nonalc: '', opp: '', city: '', whynot: '' };
 
   function showTab(t) {
     document.querySelectorAll('.tab').forEach((el,i) => {
@@ -574,6 +587,7 @@
       nonalc: selected.nonalc,
       comp: g('f-comp'),
       staff: g('f-staff'),
+      whynot: selected.whynot + (g('f-whynot') ? ' — ' + g('f-whynot') : ''),
       opp: selected.opp,
       notes: g('f-notes')
     };
@@ -585,10 +599,10 @@
   }
 
   function resetForm() {
-    ['f-name','f-hood','f-comp','f-staff','f-notes'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    ['f-name','f-hood','f-comp','f-staff','f-whynot','f-notes'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
     document.querySelectorAll('.opp-btn').forEach(b => b.className = 'opp-btn');
-    selected = { type: '', crodino: '', how: '', nonalc: '', opp: '', city: '' };
+    selected = { type: '', crodino: '', how: '', nonalc: '', opp: '', city: '', whynot: '' };
   }
 
   function updateStats() {
@@ -616,6 +630,7 @@
           ${d.nonalc ? `<span class="tag tag-neutral">${d.nonalc}</span>` : ''}
           ${d.comp ? `<div class="en-notes">Competition: ${d.comp}</div>` : ''}
           ${d.staff ? `<div class="en-notes">Staff said: "${d.staff}"</div>` : ''}
+          ${d.whynot ? `<div class="en-notes">Why no Crodino: ${d.whynot}</div>` : ''}
           ${d.notes ? `<div class="en-notes">${d.notes}</div>` : ''}
         </div>`).join('');
       return `<div class="city-header">${city} <span class="city-count">${cityEntries.length}</span></div>${cards}`;
@@ -633,7 +648,7 @@
     const summary = `CRODINO BAR AUDIT — SWITZERLAND\n${'='.repeat(32)}\nTotal bars visited: ${data.length}\nHave Crodino: ${data.filter(d=>d.crodino==='Yes').length}\nDon't have Crodino: ${data.filter(d=>d.crodino==='No').length}\nHigh opportunity venues: ${data.filter(d=>d.opp==='High').length}\nCities covered: ${[...cities].join(', ') || '—'}\n\n`;
     const cityGroups = [...new Set(data.map(d => d.city || 'Other'))].map(city => {
       const entries = data.filter(d => (d.city || 'Other') === city);
-      const lines = entries.map((d,i) => `  ${i+1}. ${d.name} (${d.hood || 'no area'}) — ${d.date}\n     Type: ${d.type || '—'} | Crodino: ${d.crodino || '—'} | How: ${d.how || '—'}\n     Non-alc: ${d.nonalc || '—'} | Competitors: ${d.comp || '—'}\n     Staff response: ${d.staff || '—'}\n     Opportunity: ${d.opp || '—'}\n     Notes: ${d.notes || '—'}`).join('\n\n');
+      const lines = entries.map((d,i) => `  ${i+1}. ${d.name} (${d.hood || 'no area'}) — ${d.date}\n     Type: ${d.type || '—'} | Crodino: ${d.crodino || '—'} | How: ${d.how || '—'}\n     Non-alc: ${d.nonalc || '—'} | Competitors: ${d.comp || '—'}\n     Staff response: ${d.staff || '—'}\n     Why no Crodino: ${d.whynot || '—'}\n     Opportunity: ${d.opp || '—'}\n     Notes: ${d.notes || '—'}`).join('\n\n');
       return `${city.toUpperCase()}\n${'-'.repeat(city.length)}\n${lines}`;
     }).join('\n\n');
     return summary + cityGroups;
@@ -668,11 +683,6 @@
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2000);
   }
-
-  updateStats();
-</script>
-</body>
-</html>
 
   updateStats();
 </script>
